@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.*;
 import java.nio.file.*;
@@ -17,6 +22,10 @@ import java.util.zip.*;
 public class ProjectGenerationController {
 
     private static final String SPRING_INITIALIZR_URL = "https://start.spring.io/starter.zip";
+    private static final String OPENAI_API_URL = "https://api.openai.com/v1/completions";  // OpenAI API endpoint
+    //private static final String OPENAI_API_KEY = "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";  // Replace with your OpenAI API key
+    //private static final String OPENAI_API_KEY = "    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";  // Replace with your OpenAI API key
+    private static final String OPENAI_API_KEY = "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";  // Replace with your OpenAI API key
 
     @GetMapping("/generate-project")
     public ResponseEntity<byte[]> generateProject(
@@ -47,11 +56,11 @@ public class ProjectGenerationController {
             // Step 3: Unzip the Spring Boot project directly into tempDir (without extra folders)
             unzipProject(tempDir, zipFilePath.toString());
 
-            // Step 4: Generate the entity code and place it in the existing src directory of the unzipped project
-            String entityCode = generateEntityCode(entityName);
-            String entityFilePath = tempDir + "/" + artifactId + "/src/main/java/"+packageName+"/entity/" +  entityName + ".java";
+            // Step 4: Generate the entity code using AI and place it in the existing src directory of the unzipped project
+            String entityCode = generateEntityCode(entityName, packageName);  // Call AI for entity code generation
+            String entityFilePath = tempDir + "/" + artifactId + "/src/main/java/" + packageName + "/entity/" + entityName + ".java";
             Path entityFile = Paths.get(entityFilePath);
-            Files.createDirectories(entityFile.getParent()); // Ensure the directory exists
+            Files.createDirectories(entityFile.getParent());  // Ensure the directory exists
             Files.write(entityFile, entityCode.getBytes());  // Write the entity code to the file
 
             // Step 5: Zip the updated project folder with the entity file included
@@ -63,7 +72,7 @@ public class ProjectGenerationController {
             // Return the zip file with the entity added
             HttpHeaders headers = new HttpHeaders();
             headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + artifactId + ".zip");
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             return new ResponseEntity<>(updatedProjectZip, headers, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -72,17 +81,32 @@ public class ProjectGenerationController {
         }
     }
 
+    // Use OpenAI or a similar API to generate entity code dynamically
+    private String generateEntityCode(String entityName, String packageName) {
+        // Construct the prompt for entity code generation
+        String prompt = String.format("Generate a simple Java class for entity '%s' with an 'id' of type Long and 'name' of type String in the package '%s'. Include getters and setters.", entityName, packageName);
 
+        // Send request to OpenAI API
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + OPENAI_API_KEY);
 
-    // Generate the entity code using AI or a predefined template
-    private String generateEntityCode(String entityName) {
-        // Example entity code (can be dynamically generated via AI or predefined template)
-        return "package com.example.myproject;\n\n" +
-                "public class " + entityName + " {\n" +
-                "    private Long id;\n" +
-                "    private String name;\n\n" +
-                "    // Getters and setters\n" +
-                "}\n";
+        String requestBody = String.format("{\"model\":\"gpt-3.5-turbo\",\"prompt\":\"%s\",\"max_tokens\":150}", prompt);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        // Make the API call and get the response
+        String response = restTemplate.exchange(OPENAI_API_URL, HttpMethod.POST, requestEntity, String.class).getBody();
+
+        // Parse the response to extract the generated class code
+        JsonNode jsonResponse = null;
+        try {
+            jsonResponse = new com.fasterxml.jackson.databind.ObjectMapper().readTree(response);
+            return jsonResponse.path("choices").get(0).path("text").asText().trim();  // Extracts the text response
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error generating entity code via AI";
+        }
     }
 
     // Unzip the project zip file directly into the target directory
@@ -107,9 +131,6 @@ public class ProjectGenerationController {
             }
         }
     }
-
-
-
 
     // Zip the project folder and return the resulting byte array
     private byte[] zipProject(Path folderToZip) throws IOException {
