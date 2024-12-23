@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s  # How often to scrape targets by default.
+
+scrape_configs:
+  - job_name: 'spring-boot-app'  # Name of the monitored job
+    metrics_path: '/actuator/prometheus'  # Prometheus endpoint in Spring Boot
+    static_configs:
+      - targets: ['host.docker.internal:8080']  # Replace with the actual service host and port

@@ -1,28 +1,51 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import EntityForm from './EntityForm';
 
 function ProjectForm() {
   const [projectName, setProjectName] = useState('');
   const [packageName, setPackageName] = useState('');
   const [javaVersion, setJavaVersion] = useState('11');
-  const [bootVersion, setBootVersion] = useState('3.2.0'); // Default Spring Boot version
-  const [projectType, setProjectType] = useState('maven-project'); // Default Maven
+  const [bootVersion, setBootVersion] = useState('3.2.0');
+  const [projectType, setProjectType] = useState('maven-project');
   const [language, setLanguage] = useState('java');
-  const [entityName, setEntityName] = useState('book');
-  // Default Java
-  const [error, setError] = useState(null); // For handling errors
+  const [entities, setEntities] = useState([
+    { entityName: '', packageName: '', fields: [{ fieldName: '', fieldType: 'String' }] },
+  ]);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Construct the Spring Initializr URL with parameters
-    const springInitializrUrl = `http://localhost:8080/generate-project?type=${projectType}&language=${language}&bootVersion=${bootVersion}&baseDir=${projectName}&groupId=${packageName}&artifactId=${projectName}&name=${projectName}&packageName=${packageName}&javaVersion=${javaVersion}&entityName=${entityName}`;
+    const requestData = {
+      type: projectType,
+      language,
+      bootVersion,
+      baseDir: projectName,
+      groupId: 'com.example',
+      artifactId: projectName.toLowerCase().replace(/\s+/g, '-'),
+      name: projectName,
+      packageName: `com.example.${projectName.toLowerCase().replace(/\s+/g, '')}`, // Default package name
+      javaVersion,
+      entities: entities.map((entity) => ({
+        name: entity.entityName,
+        packageName: `${packageName}.entity`,
+        fields: entity.fields.map((field) => ({
+          name: field.fieldName,
+          type: field.fieldType,
+        })),
+      })),
+    };
+    
 
     try {
-      // Make the GET request to download the zip file
-      const response = await axios.get(springInitializrUrl, { responseType: 'blob' });
+      const response = await axios.post('http://localhost:8080/generate-project', requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        responseType: 'blob',
+      });
 
-      // Create a download link and programmatically click it
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -31,8 +54,8 @@ function ProjectForm() {
       link.click();
       link.remove();
     } catch (error) {
-      console.error("Error generating project:", error);
-      setError("Failed to generate project. Please try again.");
+      console.error('Error generating project:', error);
+      setError('Failed to generate project. Please try again.');
     }
   };
 
@@ -102,18 +125,14 @@ function ProjectForm() {
             <option value="kotlin">Kotlin</option>
           </select>
         </div>
-      <div className="form-group">
-        <label>Entity Name</label>
-        <input
-          type="text"
-          className="form-control"
-          value={entityName}
-          onChange={(e) => setEntityName(e.target.value)}
-          required
-        />
-      </div>
+
+        <EntityForm entities={entities} setEntities={setEntities} />
+
         {error && <div className="alert alert-danger mt-3">{error}</div>}
-        <button type="submit" className="btn btn-primary mt-3">Generate Project</button>
+
+        <button type="submit" className="btn btn-primary mt-3">
+          Generate Project
+        </button>
       </form>
     </div>
   );
