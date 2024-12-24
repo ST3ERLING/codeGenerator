@@ -21,9 +21,16 @@ import java.util.zip.*;
 @RestController
 public class ProjectGenerationController {
 
+    private final RestTemplate restTemplate;
+
     private static final String SPRING_INITIALIZR_URL = "https://start.spring.io/starter.zip";
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/completions";  // OpenAI API endpoint
     private static final String OPENAI_API_KEY = "your-api-key";  // Replace with your OpenAI API key
+
+    public ProjectGenerationController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
 
     @Operation
     @PostMapping("/generate-project")
@@ -86,7 +93,7 @@ public class ProjectGenerationController {
     }
 
     // Generate entity code dynamically
-    private String generateEntityCode(ProjectRequest.Entity entity, String basePackage) {
+    /*private String generateEntityCode(ProjectRequest.Entity entity, String basePackage) {
         StringBuilder entityCode = new StringBuilder();
         entityCode.append("package ").append(basePackage).append(".entity;\n\n");
         entityCode.append("import javax.persistence.*;\n");
@@ -104,6 +111,49 @@ public class ProjectGenerationController {
         }
         entityCode.append("}\n");
         return entityCode.toString();
+    }*/
+
+    private String generateEntityCode(ProjectRequest.Entity entity, String basePackage) {
+        // Build the user input for the prompt
+        String prompt = buildEntityPrompt(entity, basePackage);
+
+        // Call the prompt API
+        String chatResponse = callChatAPI(prompt);
+
+        // Use the response to generate the entity code
+        return chatResponse;
+    }
+
+    private String buildEntityPrompt(ProjectRequest.Entity entity, String basePackage) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a JPA entity class with the following details:\n");
+        prompt.append("Package: ").append(basePackage).append(".entity\n");
+        prompt.append("Entity Name: ").append(entity.getName()).append("\n");
+        prompt.append("Fields:\n");
+        for (ProjectRequest.Field field : entity.getFields()) {
+            prompt.append("- ").append(field.getType()).append(" ").append(field.getName()).append("\n");
+        }
+        return prompt.toString();
+    }
+
+    private String callChatAPI(String userInput) {
+        try {
+            String url = "http://localhost:8081/api/chat"; // Replace with your actual base URL if necessary
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+
+            HttpEntity<String> request = new HttpEntity<>(userInput, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, String.class
+            );
+
+            return response.getBody(); // The generated entity code
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error: " + e.getMessage();
+        }
     }
 
 
