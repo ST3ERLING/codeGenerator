@@ -1,8 +1,6 @@
 // App.js
 import React from 'react';
-import ProjectForm from './components/ProjectForm';
-import EntityForm from './components/EntityForm';
-
+import ProjectForm from './component/ProjectForm';
 function App() {
   return (
     <div className="container mt-5">
