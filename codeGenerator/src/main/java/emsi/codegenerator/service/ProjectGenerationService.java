@@ -1,7 +1,9 @@
 package emsi.codegenerator.service;
 
 import emsi.codegenerator.entity.ProjectRequest;
+import emsi.codegenerator.repository.ProjectRequestRepository;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,6 +21,9 @@ import java.util.HashMap;
 
 @Service
 public class ProjectGenerationService {
+
+    @Autowired
+    ProjectRequestRepository projectRequestRepository;
 
     private static final String SPRING_INITIALIZR_URL = "https://start.spring.io/starter.zip";
     private final RestTemplate restTemplate;
@@ -88,6 +93,7 @@ public class ProjectGenerationService {
         // Step 6: Clean up
         Files.deleteIfExists(zipFilePath);
 
+        projectRequestRepository.save(projectRequest);
         return updatedProjectZip;
     }
 
