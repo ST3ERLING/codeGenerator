@@ -8,7 +8,7 @@ function App() {
     <div className="container mt-5">
       <h1>Spring Boot Project Generator</h1>
       <ProjectForm />
-      <EntityForm />
+    
     </div>
   );
 }
