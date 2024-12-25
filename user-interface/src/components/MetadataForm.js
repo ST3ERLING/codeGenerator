@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function ProjectForm({ projectDetails, setProjectDetails }) {
+function MetadataForm({ projectDetails, setProjectDetails }) {
   const { projectName, packageName, javaVersion, bootVersion, projectType, language } = projectDetails;
 
   const handleInputChange = (e) => {
@@ -10,6 +10,7 @@ function ProjectForm({ projectDetails, setProjectDetails }) {
 
   return (
     <div>
+      <h2>Define Metadata</h2>
       <form className="mt-4">
         <div className="form-group">
           <label>Project Name</label>
@@ -87,4 +88,4 @@ function ProjectForm({ projectDetails, setProjectDetails }) {
   );
 }
 
-export default ProjectForm;
+export default MetadataForm;

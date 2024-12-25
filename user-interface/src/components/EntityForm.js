@@ -103,7 +103,7 @@ function EntityForm({ entities = [], setEntities }) {
               </select>
               <button
                 type="button"
-                className="btn btn-danger btn-sm"
+                className="remove-button "
                 onClick={() => handleRemoveField(entityIndex, fieldIndex)}
               >
                 Remove
@@ -112,21 +112,21 @@ function EntityForm({ entities = [], setEntities }) {
           ))}
           <button
             type="button"
-            className="btn btn-secondary mt-2"
+            className="add-button"
             onClick={() => handleAddField(entityIndex)}
           >
             Add Field
           </button>
           <button
             type="button"
-            className="btn btn-danger mt-2 ms-2"
+            className="remove-button"
             onClick={() => handleRemoveEntity(entityIndex)}
           >
             Remove Entity
           </button>
         </div>
       ))}
-      <button type="button" className="btn btn-primary mt-4" onClick={handleAddEntity}>
+      <button type="button" className="add-button-entity" onClick={handleAddEntity}>
         Add Entity
       </button>
     </div>
