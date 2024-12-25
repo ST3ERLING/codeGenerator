@@ -15,9 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.*;
 import java.nio.file.*;
 import java.util.zip.*;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 @Service
 public class ProjectGenerationService {
@@ -57,7 +54,7 @@ public class ProjectGenerationService {
         // Step 3: Unzip the Spring Boot project
         unzipProject(tempDir, zipFilePath.toString());
 
-        // Step 4: Generate entity, service, and controller code for each entity and place it in the project
+        // Step 4: Generate entity, service, controller, and repository code for each entity and place it in the project
         for (ProjectRequest.Entity entity : projectRequest.getEntities()) {
             // Generate and save entity code
             String entityCode = generateEntityCode(entity, projectRequest.getPackageName());
@@ -67,6 +64,15 @@ public class ProjectGenerationService {
             Path entityFile = Paths.get(entityFilePath);
             Files.createDirectories(entityFile.getParent());
             Files.write(entityFile, entityCode.getBytes());
+
+            // Generate and save repository code
+            String repositoryCode = generateRepositoryCode(entity, projectRequest.getPackageName());
+            String repositoryFilePath = tempDir + "/" + projectRequest.getArtifactId() + "/src/main/java/" +
+                    projectRequest.getPackageName().replace(".", "/") + "/repository/" + entity.getName() + "Repository.java";
+
+            Path repositoryFile = Paths.get(repositoryFilePath);
+            Files.createDirectories(repositoryFile.getParent());
+            Files.write(repositoryFile, repositoryCode.getBytes());
 
             // Generate and save service code
             String serviceCode = generateServiceCode(entity, projectRequest.getPackageName());
@@ -87,14 +93,81 @@ public class ProjectGenerationService {
             Files.write(controllerFile, controllerCode.getBytes());
         }
 
-        // Step 5: Zip the updated project folder
+        // Step 5: Generate and write the pom.xml file
+        createPomXml(tempDir.resolve(projectRequest.getArtifactId()), projectRequest);
+
+        // Step 6: Zip the updated project folder
         byte[] updatedProjectZip = zipProject(tempDir.resolve(projectRequest.getArtifactId()));
 
-        // Step 6: Clean up
+        // Step 7: Clean up
         Files.deleteIfExists(zipFilePath);
 
         projectRequestRepository.save(projectRequest);
         return updatedProjectZip;
+    }
+
+    private void createPomXml(Path projectPath, ProjectRequest projectRequest) throws IOException {
+        // Generate dependencies dynamically using the chat API
+        String dependencies = generatePomXmlDependencies(projectRequest);
+
+        // Template for pom.xml with placeholders
+        String pomTemplate = """
+            <project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">
+                <modelVersion>4.0.0</modelVersion>
+                <parent>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-parent</artifactId>
+                    <version>%s</version>
+                    <relativePath/>
+                </parent>
+                <groupId>%s</groupId>
+                <artifactId>%s</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <name>%s</name>
+                <description>Generated Spring Boot Project</description>
+                <properties>
+                    <java.version>%s</java.version>
+                </properties>
+                <dependencies>
+                    %s
+                </dependencies>
+                <build>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-maven-plugin</artifactId>
+                        </plugin>
+                    </plugins>
+                </build>
+            </project>
+            """;
+
+        // Fill the template with project-specific details
+        String pomXml = String.format(
+                pomTemplate,
+                projectRequest.getBootVersion(),
+                projectRequest.getGroupId(),
+                projectRequest.getArtifactId(),
+                projectRequest.getName(),
+                projectRequest.getJavaVersion(),
+                dependencies
+        );
+
+        // Write the pom.xml to the project directory
+        Path pomFile = projectPath.resolve("pom.xml");
+        Files.writeString(pomFile, pomXml);
+    }
+
+    private String generatePomXmlDependencies(ProjectRequest projectRequest) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a Maven pom.xml dependency block with the following details:\n");
+        prompt.append("Dependencies:\n");
+        for (String dependency : projectRequest.getDependencies()) {
+            prompt.append("- ").append(dependency).append("\n");
+        }
+        prompt.append("Use the latest version for each dependency.");
+
+        return callChatAPI(prompt.toString());
     }
 
     private String generateEntityCode(ProjectRequest.Entity entity, String basePackage) {
@@ -111,7 +184,20 @@ public class ProjectGenerationService {
         for (ProjectRequest.Field field : entity.getFields()) {
             prompt.append("- ").append(field.getType()).append(" ").append(field.getName()).append("\n");
         }
+        prompt.append("Relationships:\n");
+        for (ProjectRequest.Relationship relationship : entity.getRelationships()) {
+            prompt.append("- ").append(relationship.getRelationType())
+                    .append(" to ").append(relationship.getTargetEntity()).append("\n");
+        }
         return prompt.toString();
+    }
+
+    private String generateRepositoryCode(ProjectRequest.Entity entity, String basePackage) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a Spring Boot Repository interface for the following entity:\n");
+        prompt.append("Package: ").append(basePackage).append(".repository\n");
+        prompt.append("Entity Name: ").append(entity.getName()).append("\n");
+        return callChatAPI(prompt.toString());
     }
 
     private String generateServiceCode(ProjectRequest.Entity entity, String basePackage) {
