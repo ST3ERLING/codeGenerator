@@ -92,6 +92,8 @@ function ProjectForm() {
             <option value="8">Java 8</option>
             <option value="11">Java 11</option>
             <option value="17">Java 17</option>
+            <option value="21">Java 21</option>
+            <option value="23">Java 23</option>
           </select>
         </div>
         <div className="form-group mt-3">
