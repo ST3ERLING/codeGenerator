@@ -1,7 +1,9 @@
 package emsi.codegenerator.service;
 
 import emsi.codegenerator.entity.ProjectRequest;
+import emsi.codegenerator.repository.ProjectRequestRepository;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,9 +15,15 @@ import org.springframework.web.client.RestTemplate;
 import java.io.*;
 import java.nio.file.*;
 import java.util.zip.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class ProjectGenerationService {
+
+    @Autowired
+    ProjectRequestRepository projectRequestRepository;
 
     private static final String SPRING_INITIALIZR_URL = "https://start.spring.io/starter.zip";
     private final RestTemplate restTemplate;
@@ -49,8 +57,9 @@ public class ProjectGenerationService {
         // Step 3: Unzip the Spring Boot project
         unzipProject(tempDir, zipFilePath.toString());
 
-        // Step 4: Generate entity code for each entity and place it in the project
+        // Step 4: Generate entity, service, and controller code for each entity and place it in the project
         for (ProjectRequest.Entity entity : projectRequest.getEntities()) {
+            // Generate and save entity code
             String entityCode = generateEntityCode(entity, projectRequest.getPackageName());
             String entityFilePath = tempDir + "/" + projectRequest.getArtifactId() + "/src/main/java/" +
                     projectRequest.getPackageName().replace(".", "/") + "/entity/" + entity.getName() + ".java";
@@ -58,6 +67,24 @@ public class ProjectGenerationService {
             Path entityFile = Paths.get(entityFilePath);
             Files.createDirectories(entityFile.getParent());
             Files.write(entityFile, entityCode.getBytes());
+
+            // Generate and save service code
+            String serviceCode = generateServiceCode(entity, projectRequest.getPackageName());
+            String serviceFilePath = tempDir + "/" + projectRequest.getArtifactId() + "/src/main/java/" +
+                    projectRequest.getPackageName().replace(".", "/") + "/service/" + entity.getName() + "Service.java";
+
+            Path serviceFile = Paths.get(serviceFilePath);
+            Files.createDirectories(serviceFile.getParent());
+            Files.write(serviceFile, serviceCode.getBytes());
+
+            // Generate and save controller code
+            String controllerCode = generateControllerCode(entity, projectRequest.getPackageName());
+            String controllerFilePath = tempDir + "/" + projectRequest.getArtifactId() + "/src/main/java/" +
+                    projectRequest.getPackageName().replace(".", "/") + "/controller/" + entity.getName() + "Controller.java";
+
+            Path controllerFile = Paths.get(controllerFilePath);
+            Files.createDirectories(controllerFile.getParent());
+            Files.write(controllerFile, controllerCode.getBytes());
         }
 
         // Step 5: Zip the updated project folder
@@ -66,6 +93,7 @@ public class ProjectGenerationService {
         // Step 6: Clean up
         Files.deleteIfExists(zipFilePath);
 
+        projectRequestRepository.save(projectRequest);
         return updatedProjectZip;
     }
 
@@ -86,6 +114,44 @@ public class ProjectGenerationService {
         return prompt.toString();
     }
 
+    private String generateServiceCode(ProjectRequest.Entity entity, String basePackage) {
+        String prompt = buildServicePrompt(entity, basePackage);
+        return callChatAPI(prompt);
+    }
+
+    private String buildServicePrompt(ProjectRequest.Entity entity, String basePackage) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a Spring Boot Service class for the following entity:\n");
+        prompt.append("Package: ").append(basePackage).append(".service\n");
+        prompt.append("Entity Name: ").append(entity.getName()).append("\n");
+        prompt.append("Repository: ").append(basePackage).append(".repository.").append(entity.getName()).append("Repository\n");
+        prompt.append("Operations:\n");
+        prompt.append("- Find all ").append(entity.getName().toLowerCase()).append("s\n");
+        prompt.append("- Find a ").append(entity.getName().toLowerCase()).append(" by ID\n");
+        prompt.append("- Save a ").append(entity.getName().toLowerCase()).append("\n");
+        prompt.append("- Delete a ").append(entity.getName().toLowerCase()).append(" by ID\n");
+        return prompt.toString();
+    }
+
+    private String generateControllerCode(ProjectRequest.Entity entity, String basePackage) {
+        String prompt = buildControllerPrompt(entity, basePackage);
+        return callChatAPI(prompt);
+    }
+
+    private String buildControllerPrompt(ProjectRequest.Entity entity, String basePackage) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a Spring Boot Controller class for the following service:\n");
+        prompt.append("Package: ").append(basePackage).append(".controller\n");
+        prompt.append("Service Name: ").append(entity.getName()).append("Service\n");
+        prompt.append("Entity Name: ").append(entity.getName()).append("\n");
+        prompt.append("Endpoints:\n");
+        prompt.append("- GET /api/").append(entity.getName().toLowerCase()).append("s: Fetch all ").append(entity.getName().toLowerCase()).append("s\n");
+        prompt.append("- GET /api/").append(entity.getName().toLowerCase()).append("s/{id}: Fetch ").append(entity.getName().toLowerCase()).append(" by ID\n");
+        prompt.append("- POST /api/").append(entity.getName().toLowerCase()).append("s: Save a new ").append(entity.getName().toLowerCase()).append("\n");
+        prompt.append("- DELETE /api/").append(entity.getName().toLowerCase()).append("s/{id}: Delete a ").append(entity.getName().toLowerCase()).append(" by ID\n");
+        return prompt.toString();
+    }
+
     private String callChatAPI(String userInput) {
         try {
             String url = "http://localhost:8081/api/chat"; // Replace with your actual base URL if necessary
@@ -99,7 +165,7 @@ public class ProjectGenerationService {
                     url, HttpMethod.POST, request, String.class
             );
 
-            return response.getBody(); // The generated entity code
+            return response.getBody(); // The generated code
         } catch (Exception e) {
             e.printStackTrace();
             return "Error: " + e.getMessage();
@@ -155,4 +221,3 @@ public class ProjectGenerationService {
         }
     }
 }
-
