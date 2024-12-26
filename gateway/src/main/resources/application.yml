@@ -1,0 +1,25 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: project-generator-route
+          uri: lb://PROJECT-GENERATOR-SERVICE  # Service name in Eureka
+          predicates:
+            - Path=/project-generator/** # Match incoming paths
+          filters:
+            - StripPrefix=1
+        - id: prompt-service-route
+          uri: lb://PROMPT-SERVICE  # Service name in Eureka
+          predicates:
+            - Path=/prompt-service/**  # Match incoming paths
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS

@@ -62,10 +62,11 @@ function ProjectForm() {
     console.log('Payload:', requestData);
 
     try {
-      const response = await axios.post('http://localhost:8080/generate-project', requestData, {
+      const response = await axios.post('http://localhost:8888/project-generator/generate-project', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
+        withCredentials: true, // Ensures cookies/credentials are sent
         responseType: 'blob',
       });
 
