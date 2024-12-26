@@ -1,6 +1,7 @@
 // App.js
 import React from 'react';
 import ProjectForm from './components/ProjectForm';
+import ChatSupport from './components/ChatSupport';
 function App() {
   return (
     <div className="container mt-5">
@@ -10,6 +11,7 @@ function App() {
       <ProjectForm />
       </div>
       </div>
+      <ChatSupport />
     </div>
   );
 }
