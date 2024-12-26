@@ -16,6 +16,47 @@ function EntityForm({ entities = [], setEntities }) {
     setEntities(updatedEntities);
   };
 
+  const handleAddRelationship = (entityIndex) => {
+    const updatedEntities = entities.map((entity, idx) =>
+      idx === entityIndex
+        ? {
+            ...entity,
+            relationships: [
+              ...(entity.relationships || []),
+              { targetEntity: '', relationType: 'OneToOne' },
+            ],
+          }
+        : entity
+    );
+    setEntities(updatedEntities);
+  };
+  
+  const handleRelationshipChange = (entityIndex, relationIndex, name, value) => {
+    const updatedEntities = entities.map((entity, idx) =>
+      idx === entityIndex
+        ? {
+            ...entity,
+            relationships: entity.relationships.map((relation, rIdx) =>
+              rIdx === relationIndex ? { ...relation, [name]: value } : relation
+            ),
+          }
+        : entity
+    );
+    setEntities(updatedEntities);
+  };
+  
+  const handleRemoveRelationship = (entityIndex, relationIndex) => {
+    const updatedEntities = entities.map((entity, idx) =>
+      idx === entityIndex
+        ? {
+            ...entity,
+            relationships: entity.relationships.filter((_, rIdx) => rIdx !== relationIndex),
+          }
+        : entity
+    );
+    setEntities(updatedEntities);
+  };
+
   const handleAddField = (entityIndex) => {
     const updatedEntities = entities.map((entity, idx) =>
       idx === entityIndex
@@ -57,6 +98,7 @@ function EntityForm({ entities = [], setEntities }) {
       <h2>Define Entities</h2>
       {entities.map((entity, entityIndex) => (
         <div key={entityIndex} className="mt-3 border p-3">
+          {/* Entity Name */}
           <div className="form-group">
             <label>Entity Name</label>
             <input
@@ -67,6 +109,8 @@ function EntityForm({ entities = [], setEntities }) {
               required
             />
           </div>
+  
+          {/* Package Name */}
           <div className="form-group mt-2">
             <label>Package Name</label>
             <input
@@ -76,7 +120,8 @@ function EntityForm({ entities = [], setEntities }) {
               onChange={(e) => handleEntityChange(entityIndex, 'packageName', e.target.value)}
             />
           </div>
-
+  
+          {/* Fields Section */}
           <h4 className="mt-3">Fields</h4>
           {entity.fields.map((field, fieldIndex) => (
             <div key={fieldIndex} className="d-flex align-items-center mt-2">
@@ -103,7 +148,7 @@ function EntityForm({ entities = [], setEntities }) {
               </select>
               <button
                 type="button"
-                className="remove-button "
+                className="remove-button"
                 onClick={() => handleRemoveField(entityIndex, fieldIndex)}
               >
                 Remove
@@ -117,9 +162,60 @@ function EntityForm({ entities = [], setEntities }) {
           >
             Add Field
           </button>
+  
+          {/* Relationships Section */}
+          <h4 className="mt-3">Relationships</h4>
+          {(entity.relationships || []).map((relation, relationIndex) => (
+            <div key={relationIndex} className="d-flex align-items-center mt-2">
+              <select
+                className="form-control me-2"
+                value={relation.relationType}
+                onChange={(e) =>
+                  handleRelationshipChange(entityIndex, relationIndex, 'relationType', e.target.value)
+                }
+              >
+                <option value="OneToOne">OneToOne</option>
+                <option value="OneToMany">OneToMany</option>
+                <option value="ManyToOne">ManyToOne</option>
+                <option value="ManyToMany">ManyToMany</option>
+              </select>
+              <select
+                className="form-control me-2"
+                value={relation.targetEntity}
+                onChange={(e) =>
+                  handleRelationshipChange(entityIndex, relationIndex, 'targetEntity', e.target.value)
+                }
+              >
+                <option value="">Select Target Entity</option>
+                {entities
+                  .filter((_, idx) => idx !== entityIndex)
+                  .map((otherEntity, idx) => (
+                    <option key={idx} value={otherEntity.entityName}>
+                      {otherEntity.entityName}
+                    </option>
+                  ))}
+              </select>
+              <button
+                type="button"
+                className="remove-button"
+                onClick={() => handleRemoveRelationship(entityIndex, relationIndex)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
           <button
             type="button"
-            className="remove-button"
+            className="add-button"
+            onClick={() => handleAddRelationship(entityIndex)}
+          >
+            Add Relationship
+          </button>
+  
+          {/* Remove Entity */}
+          <button
+            type="button"
+            className="remove-button mt-2"
             onClick={() => handleRemoveEntity(entityIndex)}
           >
             Remove Entity
@@ -131,6 +227,7 @@ function EntityForm({ entities = [], setEntities }) {
       </button>
     </div>
   );
+  
 }
 
 export default EntityForm;

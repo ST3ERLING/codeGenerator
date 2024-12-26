@@ -25,7 +25,8 @@ public class ProjectRequest {
     private String name;
     private String packageName;
     private String javaVersion;
-    private List<Entity> entities; // Updated to allow multiple entities
+    private List<Entity> entities;
+    private List<String> dependencies;
 
     @AllArgsConstructor
     @NoArgsConstructor
@@ -34,6 +35,8 @@ public class ProjectRequest {
         private String name;
         private String packageName;
         private List<Field> fields;
+        private List<Relationship> relationships;// Example: "OneToOne", "OneToMany", "ManyToOne", "ManyToMany"
+
     }
 
     @AllArgsConstructor
@@ -42,5 +45,17 @@ public class ProjectRequest {
     public static class Field {
         private String name;
         private String type;
+        private boolean isRelationship; // Indicate if this field is a relationship
+        private String relationType;
+        private String targetEntity;    // Target entity name
+
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class Relationship {
+        private String relationType; // Example: "OneToOne", "OneToMany", etc.
+        private String targetEntity; // Name of the target entity
     }
 }

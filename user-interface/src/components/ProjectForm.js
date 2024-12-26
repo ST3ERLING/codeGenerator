@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MetadataForm from './MetadataForm';
 import EntityForm from './EntityForm';
+import DependencyForm from './DependencyForm'; // Import DependencyForm
 import axios from 'axios';
 
 function ProjectForm() {
@@ -16,6 +17,7 @@ function ProjectForm() {
   const [entities, setEntities] = useState([
     { entityName: '', packageName: '', fields: [{ fieldName: '', fieldType: 'String' }] },
   ]);
+  const [selectedDependencies, setSelectedDependencies] = useState([]); // Define selectedDependencies
   const [error, setError] = useState(null);
 
   const handleNext = () => {
@@ -49,7 +51,12 @@ function ProjectForm() {
           name: field.fieldName,
           type: field.fieldType,
         })),
+        relationships: (entity.relationships || []).map((relation) => ({
+          targetEntity: relation.targetEntity,
+          relationType: relation.relationType,
+        })),
       })),
+      dependencies: selectedDependencies, // Include selected dependencies
     };
 
     console.log('Payload:', requestData);
@@ -76,12 +83,19 @@ function ProjectForm() {
   };
 
   return (
-    <div >
+    <div>
       {step === 1 && (
         <MetadataForm projectDetails={projectDetails} setProjectDetails={setProjectDetails} />
       )}
 
       {step === 2 && <EntityForm entities={entities} setEntities={setEntities} />}
+
+      {step === 3 && (
+        <DependencyForm
+          selectedDependencies={selectedDependencies}
+          setSelectedDependencies={setSelectedDependencies}
+        />
+      )}
 
       {error && <div className="alert alert-danger mt-3">{error}</div>}
 
@@ -91,20 +105,21 @@ function ProjectForm() {
             Back
           </button>
         )}
-        {step < 2 && (
+        {step < 3 && (
           <button className="next-button" onClick={handleNext}>
             Next
           </button>
         )}
-        {step === 2 && (
-          <button className="ganerate-button" onClick={handleGenerateProject}>
+        {step === 3 && (
+          <button className="generate-button" onClick={handleGenerateProject}>
             Generate Project
           </button>
         )}
         <div className="steps">
-        <span className={step === 1 ? 'active-step' : ''}>1</span>
-        <span className={step === 2 ? 'active-step' : ''}>2</span>
-      </div>
+          <span className={step === 1 ? 'active-step' : ''}>1</span>
+          <span className={step === 2 ? 'active-step' : ''}>2</span>
+          <span className={step === 3 ? 'active-step' : ''}>3</span>
+        </div>
       </div>
     </div>
   );
