@@ -111,7 +111,7 @@ function ProjectForm() {
           </button>
         )}
         {step === 3 && (
-          <button className="generate-button" onClick={handleGenerateProject}>
+          <button className="ganerate-button" onClick={handleGenerateProject}>
             Generate Project
           </button>
         )}

@@ -8,6 +8,7 @@ const ChatSupport = () => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false); // To show loading while waiting for AI response
+  const [isOpen, setIsOpen] = useState(false); // Track whether chat is open or closed
 
   const handleSend = async () => {
     if (input.trim()) {
@@ -40,35 +41,49 @@ const ChatSupport = () => {
     }
   };
 
+  const toggleChat = () => {
+    setIsOpen((prev) => !prev); // Toggle chat visibility
+  };
+
   return (
-    <div className="chat-support-container">
-      <div className="chat-header">Chat Support</div>
-      <div className="chat-messages">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`chat-message ${msg.type === 'user' ? 'user-message' : 'support-message'}`}
-          >
-            {msg.text}
+    <div>
+      {/* Button to open or close the chat */}
+      <button className="chat-toggle-button" onClick={toggleChat}>
+      Chat Support
+      </button>
+
+      {/* Only show chat if it's open */}
+      {isOpen && (
+        <div className="chat-support-container">
+          <div className="chat-header" onClick={toggleChat} style={{ cursor: 'pointer' }}>Chat Support</div>
+          <div className="chat-messages">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`chat-message ${msg.type === 'user' ? 'user-message' : 'support-message'}`}
+              >
+                {msg.text}
+              </div>
+            ))}
+            {loading && (
+              <div className="chat-message support-message">Typing...</div>
+            )}
           </div>
-        ))}
-        {loading && (
-          <div className="chat-message support-message">Typing...</div>
-        )}
-      </div>
-      <div className="chat-input-container">
-        <input
-          type="text"
-          className="chat-input"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-        />
-        <button className="chat-send-button" onClick={handleSend}>
-          Send
-        </button>
-      </div>
+          <div className="chat-input-container">
+            <input
+              type="text"
+              className="chat-input"
+              placeholder="Type a message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            />
+            <button className="chat-send-button" onClick={handleSend}>
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
