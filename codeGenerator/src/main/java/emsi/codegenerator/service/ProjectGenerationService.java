@@ -240,7 +240,7 @@ public class ProjectGenerationService {
 
     private String callChatAPI(String userInput) {
         try {
-            String url = "http://localhost:8081/api/chat"; // Replace with your actual base URL if necessary
+            String url = "http://localhost:8082/api/chat"; // Replace with your actual base URL if necessary
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/json");

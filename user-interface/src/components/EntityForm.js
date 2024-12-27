@@ -95,12 +95,12 @@ function EntityForm({ entities = [], setEntities }) {
 
   return (
     <div className="mt-4">
-      <h2>Define Entities</h2>
+      <h2 style={{ fontWeight: 'bold' }}>Define Entities</h2>
       {entities.map((entity, entityIndex) => (
         <div key={entityIndex} className="mt-3 border p-3">
           {/* Entity Name */}
           <div className="form-group">
-            <label>Entity Name</label>
+            <label style={{ fontWeight: 'bold' }}>Entity Name</label>
             <input
               type="text"
               className="form-control"
@@ -112,7 +112,7 @@ function EntityForm({ entities = [], setEntities }) {
   
           {/* Package Name */}
           <div className="form-group mt-2">
-            <label>Package Name</label>
+            <label style={{ fontWeight: 'bold' }}>Package Name</label>
             <input
               type="text"
               className="form-control"
@@ -122,7 +122,7 @@ function EntityForm({ entities = [], setEntities }) {
           </div>
   
           {/* Fields Section */}
-          <h4 className="mt-3">Fields</h4>
+          <h4 className="mt-3" style={{ fontWeight: 'bold' }}>Fields</h4>
           {entity.fields.map((field, fieldIndex) => (
             <div key={fieldIndex} className="d-flex align-items-center mt-2">
               <input
@@ -164,7 +164,7 @@ function EntityForm({ entities = [], setEntities }) {
           </button>
   
           {/* Relationships Section */}
-          <h4 className="mt-3">Relationships</h4>
+          <h4 className="mt-3" style={{ fontWeight: 'bold' }}>Relationships</h4>
           {(entity.relationships || []).map((relation, relationIndex) => (
             <div key={relationIndex} className="d-flex align-items-center mt-2">
               <select
