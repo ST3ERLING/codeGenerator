@@ -54,7 +54,6 @@ body {
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 20px;
 }
 
 .back-button {
@@ -65,6 +64,7 @@ body {
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
+  margin-right: 76%;
 }
 .remove-button {
   background: #DC143C; /* Button color */
@@ -94,8 +94,8 @@ body {
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
-  margin-left: 30%;
-  margin-right: 30%;
+  margin-left: 37%;
+  margin-right: 37%;
   margin-bottom: 20px;
   justify-content: center; /* Center horizontally */
   align-items: center
