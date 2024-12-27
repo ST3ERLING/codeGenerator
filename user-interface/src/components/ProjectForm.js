@@ -62,7 +62,7 @@ function ProjectForm() {
     console.log('Payload:', requestData);
 
     try {
-      const response = await axios.post('http://localhost:8080/generate-project', requestData, {
+      const response = await axios.post('http://localhost:8081/generate-project', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },

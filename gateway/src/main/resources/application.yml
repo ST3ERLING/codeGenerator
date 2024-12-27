@@ -1,0 +1,39 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors: # Optional if you're using GatewayCorsConfig
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - "GET"
+              - "POST"
+              - "PUT"
+              - "DELETE"
+              - "OPTIONS"
+              - "HEAD"
+              - "PATCH"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+    loadbalancer:
+      retry:
+        enabled: true
+  application:
+    name: GATEWAY_SERVICES
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+server:
+  port: 8888
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
