@@ -30,8 +30,8 @@ public class GatewayApplication {
 				.route("prompt_service_route", r -> r.path("/prompt/**")
 						.filters(f -> f.stripPrefix(1))
 						.uri("lb://PROMPT-SERVICE")) // Load-balances to the service
+				.route("user_service_route", r -> r.path("/users/**")
+						.uri("lb://USER-SERVICE")) // Load-balances to the service
 				.build();
 	}
-
-
 }
