@@ -19,7 +19,7 @@ const ChatSupport = () => {
 
       try {
         // Send the user's message to the backend API
-        const response = await axios.post('http://localhost:8081/api/chat', userMessage, {
+        const response = await axios.post('http://localhost:8888/prompt-service/api/chat', userMessage, {
           headers: { 'Content-Type': 'application/json' },
         });
 

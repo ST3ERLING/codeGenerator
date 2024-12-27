@@ -12,14 +12,22 @@ spring:
           uri: lb://PROMPT-SERVICE  # Service name in Eureka
           predicates:
             - Path=/prompt-service/**  # Match incoming paths
+          filters:
+            - StripPrefix=1
 
       globalcors:
         cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
+          '[/**]': # Match all routes
+            allowedOrigins:
+              - http://localhost:3000  # React app origin
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - Content-Disposition
+            allowCredentials: true  # Required for cookies/session handling

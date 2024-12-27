@@ -70,6 +70,9 @@ function ProjectForm() {
         responseType: 'blob',
       });
 
+      console.log('Response:', response); // Log the entire response
+      console.log('Response Blob:', response.data); // Log the blob data
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
