@@ -29,7 +29,7 @@ function DependencyForm({ selectedDependencies, setSelectedDependencies }) {
 
   return (
     <div>
-      <h3 style={{ fontWeight: "bold" }}>Select Dependencies</h3>
+      <h3 className="Sous-Title">Select Dependencies</h3>
 
       {/* Dropdown for Selecting Dependencies */}
       <div style={{ marginBottom: "15px" }}>

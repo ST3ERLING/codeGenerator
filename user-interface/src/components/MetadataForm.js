@@ -10,7 +10,7 @@ function MetadataForm({ projectDetails, setProjectDetails }) {
 
   return (
     <div>
-      <h2>Define Metadata</h2>
+      <h2 className="Sous-Title">Define Metadata</h2>
       <form className="mt-4">
         <div className="form-group">
           <label style={{ fontWeight: 'bold' }}>Project Name</label>

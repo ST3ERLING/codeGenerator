@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import MetadataForm from './MetadataForm';
-import EntityForm from './EntityForm';
-import DependencyForm from './DependencyForm'; // Import DependencyForm
-import axios from 'axios';
+import React, { useState } from "react";
+import MetadataForm from "./MetadataForm";
+import EntityForm from "./EntityForm";
+import PhotoDrop from "./PhotoDrop"; // Import PhotoDrop
+import DependencyForm from "./DependencyForm"; // Import DependencyForm
+import axios from "axios";
 
 function ProjectForm() {
   const [step, setStep] = useState(1); // Track the current step
   const [projectDetails, setProjectDetails] = useState({
-    projectName: '',
-    packageName: '',
-    javaVersion: '11',
-    bootVersion: '3.4.1',
-    projectType: 'maven-project',
-    language: 'java',
+    projectName: "",
+    packageName: "",
+    javaVersion: "11",
+    bootVersion: "3.4.1",
+    projectType: "maven-project",
+    language: "java",
   });
   const [entities, setEntities] = useState([
-    { entityName: '', packageName: '', fields: [{ fieldName: '', fieldType: 'String' }] },
+    {
+      entityName: "",
+      packageName: "",
+      fields: [{ fieldName: "", fieldType: "String" }],
+    },
   ]);
   const [selectedDependencies, setSelectedDependencies] = useState([]); // Define selectedDependencies
   const [error, setError] = useState(null);
 
   const handleNext = () => {
     if (step === 1 && !projectDetails.projectName) {
-      setError('Project Name is required');
+      setError("Project Name is required");
       return;
     }
     setError(null);
@@ -35,15 +40,15 @@ function ProjectForm() {
 
   const handleGenerateProject = async () => {
     const requestData = {
-      type: projectDetails.projectType || 'maven-project',
-      language: projectDetails.language || 'java',
-      bootVersion: projectDetails.bootVersion || '3.4.1',
-      baseDir: projectDetails.projectName || 'default-project',
-      groupId: 'com.example',
-      artifactId: projectDetails.projectName.toLowerCase().replace(/\s+/g, '-'),
+      type: projectDetails.projectType || "maven-project",
+      language: projectDetails.language || "java",
+      bootVersion: projectDetails.bootVersion || "3.4.1",
+      baseDir: projectDetails.projectName || "default-project",
+      groupId: "com.example",
+      artifactId: projectDetails.projectName.toLowerCase().replace(/\s+/g, "-"),
       name: projectDetails.projectName,
-      packageName: projectDetails.packageName || 'com.example',
-      javaVersion: projectDetails.javaVersion || '11',
+      packageName: projectDetails.packageName || "com.example",
+      javaVersion: projectDetails.javaVersion || "11",
       entities: entities.map((entity) => ({
         name: entity.entityName,
         packageName: `${projectDetails.packageName}.entity`,
@@ -59,36 +64,54 @@ function ProjectForm() {
       dependencies: selectedDependencies, // Include selected dependencies
     };
 
-    console.log('Payload:', requestData);
+    console.log("Payload:", requestData);
 
     try {
-      const response = await axios.post('http://localhost:8080/generate-project', requestData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        responseType: 'blob',
-      });
+      const response = await axios.post(
+        "http://localhost:8080/generate-project",
+        requestData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          responseType: "blob",
+        }
+      );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `${projectDetails.projectName}.zip`);
+      link.setAttribute("download", `${projectDetails.projectName}.zip`);
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (error) {
-      console.error('Error generating project:', error.response?.data || error.message);
-      setError('Failed to generate project. Please try again.');
+      console.error(
+        "Error generating project:",
+        error.response?.data || error.message
+      );
+      setError("Failed to generate project. Please try again.");
     }
   };
 
   return (
     <div>
       {step === 1 && (
-        <MetadataForm projectDetails={projectDetails} setProjectDetails={setProjectDetails} />
+        <MetadataForm
+          projectDetails={projectDetails}
+          setProjectDetails={setProjectDetails}
+        />
       )}
 
-      {step === 2 && <EntityForm entities={entities} setEntities={setEntities} />}
+      {/* Step 2: Entity Generation */}
+      {step === 2 && (
+        <div>
+          {/* Manual entity input */}
+          <EntityForm entities={entities} setEntities={setEntities} />
+          {/* Allow image upload */}
+          <PhotoDrop />
+        </div>
+      )}
 
       {step === 3 && (
         <DependencyForm
@@ -116,9 +139,9 @@ function ProjectForm() {
           </button>
         )}
         <div className="steps">
-          <span className={step === 1 ? 'active-step' : ''}>1</span>
-          <span className={step === 2 ? 'active-step' : ''}>2</span>
-          <span className={step === 3 ? 'active-step' : ''}>3</span>
+          <span className={step === 1 ? "active-step" : ""}>1</span>
+          <span className={step === 2 ? "active-step" : ""}>2</span>
+          <span className={step === 3 ? "active-step" : ""}>3</span>
         </div>
       </div>
     </div>

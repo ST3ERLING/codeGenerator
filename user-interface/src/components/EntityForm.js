@@ -95,7 +95,7 @@ function EntityForm({ entities = [], setEntities }) {
 
   return (
     <div className="mt-4">
-      <h2 style={{ fontWeight: 'bold' }}>Define Entities</h2>
+      <h2 className="Sous-Title">Define Entities</h2>
       {entities.map((entity, entityIndex) => (
         <div key={entityIndex} className="mt-3 border p-3">
           {/* Entity Name */}

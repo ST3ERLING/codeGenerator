@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="container mt-5">
       <div className="content">
-      <h1>Spring Boot Project Generator</h1>
+      <h1 className="Title">Spring Boot Project Generator</h1>
       <div className="form-container">
       <ProjectForm />
       </div>
