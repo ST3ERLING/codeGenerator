@@ -1,6 +1,5 @@
 package emsi.codegenerator.service;
 
-import emsi.codegenerator.controller.PromptServiceClient;
 import emsi.codegenerator.entity.ProjectRequest;
 import emsi.codegenerator.repository.ProjectRequestRepository;
 import org.apache.commons.io.FileUtils;
@@ -24,12 +23,10 @@ public class ProjectGenerationService {
     ProjectRequestRepository projectRequestRepository;
 
     private static final String SPRING_INITIALIZR_URL = "https://start.spring.io/starter.zip";
+    private final RestTemplate restTemplate;
 
-
-    private final PromptServiceClient promptServiceClient;
-
-    public ProjectGenerationService(PromptServiceClient promptServiceClient) {
-        this.promptServiceClient = promptServiceClient;
+    public ProjectGenerationService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     public byte[] generateSpringProject(ProjectRequest projectRequest) throws Exception {
@@ -47,7 +44,7 @@ public class ProjectGenerationService {
                 projectRequest.getJavaVersion()
         );
 
-        byte[] projectZip = new RestTemplate().getForObject(url, byte[].class);
+        byte[] projectZip = restTemplate.getForObject(url, byte[].class);
 
         // Step 2: Create a temporary directory to extract the Spring Boot project
         Path tempDir = Files.createTempDirectory("project-temp");
@@ -243,7 +240,18 @@ public class ProjectGenerationService {
 
     private String callChatAPI(String userInput) {
         try {
-            return promptServiceClient.generateCode(userInput); // The generated code
+            String url = "http://localhost:8082/api/chat"; // Replace with your actual base URL if necessary
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+
+            HttpEntity<String> request = new HttpEntity<>(userInput, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, String.class
+            );
+
+            return response.getBody(); // The generated code
         } catch (Exception e) {
             e.printStackTrace();
             return "Error: " + e.getMessage();

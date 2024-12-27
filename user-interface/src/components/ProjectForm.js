@@ -62,16 +62,12 @@ function ProjectForm() {
     console.log('Payload:', requestData);
 
     try {
-      const response = await axios.post('http://localhost:8888/project-generator/generate-project', requestData, {
+      const response = await axios.post('http://localhost:8081/generate-project', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        withCredentials: true, // Ensures cookies/credentials are sent
         responseType: 'blob',
       });
-
-      console.log('Response:', response); // Log the entire response
-      console.log('Response Blob:', response.data); // Log the blob data
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
