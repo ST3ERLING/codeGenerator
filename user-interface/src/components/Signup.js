@@ -1,20 +1,34 @@
-// Install Tailwind CSS by following the official setup guide: https://tailwindcss.com/docs/installation
-
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
-    console.log('Registration submitted', { name, email, password });
+    try {
+      const response = await axios.post('http://localhost:8888/users/signup', null, {
+        params: {
+          username: email,
+          password: password,
+          email: email,
+        },
+      });
+      setSuccess(response.data);
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to register. Please try again.');
+    }
   };
 
   return (
@@ -22,6 +36,9 @@ const Signup = () => {
       <div className="w-full max-w-md p-8 space-y-4 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center text-gray-800">Create an Account</h2>
         <p className="text-sm text-center text-gray-600">Register to get started</p>
+
+        {error && <p className="text-sm text-center text-red-600">{error}</p>}
+        {success && <p className="text-sm text-center text-green-600">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
