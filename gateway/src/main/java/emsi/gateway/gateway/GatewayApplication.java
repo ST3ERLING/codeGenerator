@@ -28,6 +28,7 @@ public class GatewayApplication {
 						.filters(f -> f.stripPrefix(1)) // Removes "/code-generator" from the path
 						.uri("lb://CODE-GENERATOR-SERVICE")) // Load-balances to the service
 				.route("prompt_service_route", r -> r.path("/prompt/**")
+						.filters(f -> f.stripPrefix(1))
 						.uri("lb://PROMPT-SERVICE")) // Load-balances to the service
 				.build();
 	}
