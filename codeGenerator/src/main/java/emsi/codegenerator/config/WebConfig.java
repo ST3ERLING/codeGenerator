@@ -14,7 +14,12 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/generate-project").allowedOrigins("http://localhost:3000");
+                registry.addMapping("/**") // Apply to all endpoints
+                        .allowedOrigins("http://localhost:3000") // Allow requests from your React app
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow specific methods
+                        .allowedHeaders("*") // Allow all headers
+                        .allowCredentials(true); // Allow cookies or authentication headers
             }
         };
-    }
+        }
 }
