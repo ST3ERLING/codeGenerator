@@ -189,8 +189,13 @@ public class ProjectGenerationService {
             prompt.append("- ").append(relationship.getRelationType())
                     .append(" to ").append(relationship.getTargetEntity()).append("\n");
         }
+        prompt.append("\nAdditional Details:\n");
+        prompt.append("- Generate default getters and setters for all fields.\n");
+        prompt.append("- Generate a no-argument constructor.\n");
+        prompt.append("- Generate a constructor with all fields as arguments.\n");
         return prompt.toString();
     }
+
 
     private String generateRepositoryCode(ProjectRequest.Entity entity, String basePackage) {
         StringBuilder prompt = new StringBuilder();
