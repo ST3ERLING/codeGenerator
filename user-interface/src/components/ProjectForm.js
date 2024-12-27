@@ -40,8 +40,8 @@ function ProjectForm() {
       bootVersion: projectDetails.bootVersion || '3.4.1',
       baseDir: projectDetails.projectName || 'default-project',
       groupId: 'com.example',
-      artifactId: projectDetails.projectName.toLowerCase().replace(/\s+/g, '-'),
-      name: projectDetails.projectName,
+      artifactId: projectDetails.projectName?.toLowerCase().replace(/\s+/g, '-') || 'default-project',
+      name: projectDetails.projectName || 'default-project',
       packageName: projectDetails.packageName || 'com.example',
       javaVersion: projectDetails.javaVersion || '11',
       entities: entities.map((entity) => ({
@@ -56,23 +56,28 @@ function ProjectForm() {
           relationType: relation.relationType,
         })),
       })),
-      dependencies: selectedDependencies, // Include selected dependencies
+      dependencies: selectedDependencies,
     };
-
+  
     console.log('Payload:', requestData);
-
+  
     try {
-      const response = await axios.post('http://localhost:8081/generate-project', requestData, {
+      const response = await axios.post('http://localhost:8888/code-generator/generate-project', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
         responseType: 'blob',
       });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+  
+      console.log('Blob response:', response.data);
+  
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/zip' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${projectDetails.projectName}.zip`);
+  
+      // Ensure filename ends with .zip
+      link.setAttribute('download', `${projectDetails.projectName || 'default-project'}.zip`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -81,7 +86,7 @@ function ProjectForm() {
       setError('Failed to generate project. Please try again.');
     }
   };
-
+  
   return (
     <div>
       {step === 1 && (
