@@ -89,10 +89,34 @@
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 10px 15px;
+  padding: 10px 20px;
   cursor: pointer;
 }
 
 .chat-send-button:hover {
   background-color: #023E8A;
+}
+
+/* Expand button next to the send button */
+.chat-expand-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.chat-expand-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Add expanded chat styles */
+.chat-expanded {
+  width: 600px; /* Adjust width for expanded view */
+  height: 600px; /* Adjust height for expanded view */
+}
+
+.chat-messages {
+  height: calc(100% - 80px); /* Adjust height dynamically */
 }
