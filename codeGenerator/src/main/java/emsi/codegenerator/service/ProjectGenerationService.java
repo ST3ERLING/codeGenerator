@@ -189,12 +189,23 @@ public class ProjectGenerationService {
             prompt.append("- ").append(relationship.getRelationType())
                     .append(" to ").append(relationship.getTargetEntity()).append("\n");
         }
+
+        // Add import statements for related entities in the same package
+        prompt.append("\nImports:\n");
+        for (ProjectRequest.Relationship relationship : entity.getRelationships()) {
+            prompt.append("- import ").append(basePackage).append(".entity.")
+                    .append(relationship.getTargetEntity()).append(";\n");
+        }
+
+        // Add additional instructions for generating methods and constructors
         prompt.append("\nAdditional Details:\n");
         prompt.append("- Generate default getters and setters for all fields.\n");
         prompt.append("- Generate a no-argument constructor.\n");
         prompt.append("- Generate a constructor with all fields as arguments.\n");
+
         return prompt.toString();
     }
+
 
 
     private String generateRepositoryCode(ProjectRequest.Entity entity, String basePackage) {
