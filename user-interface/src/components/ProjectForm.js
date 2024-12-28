@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MetadataForm from './MetadataForm';
 import EntityForm from './EntityForm';
+import LoadingSpinner from './LoadingSpinner';
 import DependencyForm from './DependencyForm'; // Import DependencyForm
 import axios from 'axios';
 
@@ -19,6 +20,7 @@ function ProjectForm() {
   ]);
   const [selectedDependencies, setSelectedDependencies] = useState([]); // Define selectedDependencies
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleNext = () => {
     if (step === 1 && !projectDetails.projectName) {
@@ -58,7 +60,7 @@ function ProjectForm() {
       })),
       dependencies: selectedDependencies,
     };
-  
+    setIsLoading(true);
     console.log('Payload:', requestData);
   
     try {
@@ -84,11 +86,14 @@ function ProjectForm() {
     } catch (error) {
       console.error('Error generating project:', error.response?.data || error.message);
       setError('Failed to generate project. Please try again.');
+    } finally {
+      setIsLoading(false); // Hide spinner
     }
   };
   
   return (
     <div>
+      {isLoading && <LoadingSpinner />} {/* Display spinner when isLoading is true */}
       {step === 1 && (
         <MetadataForm projectDetails={projectDetails} setProjectDetails={setProjectDetails} />
       )}
